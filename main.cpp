@@ -29,6 +29,7 @@ string jsonstring = "\
 
 int main()
 {
+	// read
 	TinyJson json;
 	json.ReadJson(jsonstring);
 
@@ -53,6 +54,27 @@ int main()
 			cout << "love1: " << love1 << "  love2: " << love2 << endl;
 		}
 	}
+
+	// write
+	TinyJson wjson;
+	wjson["name"].Set("chenhuizong");
+	wjson["age"].Set(26);
+	wjson["handsome"].Set(true);
+
+	TinyJson subjson;
+	subjson["love1"].Set("book");
+	subjson["love2"].Set(666);
+
+	TinyJson subjson2;
+	subjson2["love1"].Set("book");
+	subjson2["love2"].Set(666);
+
+	wjson["data"].Put(subjson);
+	wjson["data2"].Put(subjson2);
+
+	string str = wjson.WriteJson();
+	cout << "json string: " << endl;
+	cout << str << endl;
 
 	return 0;
 }

@@ -6,25 +6,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-
-class Value 
-{
-public:
-	Value() { value_.clear(); }
-	Value(std::string val) : value_(val) {}
-	~Value() {}
-
-public:
-	template<typename R>
-	R Format() {
-		std::istringstream iss(value_);
-		R v;
-		iss >> v;
-		return v;
-	}
-private:
-	std::string value_;
-};
+#include "value.hpp"
 
 class ParseJson
 {
@@ -44,14 +26,18 @@ private:
 	bool token_flag_;
 };
 
+class TinyJson;
+typedef ValueS<TinyJson> Values;
+
 class TinyJson
 {
-	friend class Values;
+	friend class ValueS<TinyJson>;
 public:
 	TinyJson();
 	~TinyJson();
 
 public:
+	// read
 	bool ReadJson(std::string json);
 
 	template<typename R>
@@ -60,33 +46,21 @@ public:
 		if (itr == KeyVal_.end()) {
 			return R();
 		}
-		return Value(*(++itr)).Format<R>();
+		return Value(*(++itr)).GetAs<R>();
 	}
 	Values GetChild(std::string key);
 
+	// write
+	Value& operator[](std::string k) {
+		Items_.push_back(Value(k));
+		return Items_[Items_.size() - 1];
+	}
+
+	std::string WriteJson();
+
 private:
 	std::vector<std::string> KeyVal_;
-};
-
-class Values : public TinyJson
-{
-public:
-	Values() {}
-	Values(std::vector<std::string> vo) {
-		vo_ = vo;
-	}
-
-	bool Parse(int i) {
-		std::string obj = vo_[i];
-		return ReadJson(obj);
-	}
-
-	int GetCount() {
-		return vo_.size();
-	}
-
-private:
-	std::vector<std::string> vo_;
+	std::vector<Value> Items_;
 };
 
 #endif  // BUTTON_TINY_JSON_H_

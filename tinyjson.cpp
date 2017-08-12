@@ -24,6 +24,43 @@ Values TinyJson::GetChild(std::string key) {
 	return vals;
 }
 
+std::string TinyJson::WriteJson()
+{
+	std::ostringstream oss;
+	oss << "{";
+	std::map<std::string, std::string> arrays;
+	int i = 0;
+	int size = Items_.size();
+	std::string tmpl = "";
+	std::string tmpr = "]";
+	std::string seq = ",";
+	for (; i < size; ++i) {
+		Value& v = Items_[i];
+		if (i == size - 1) {
+			seq = "";
+		}
+		if (!v.GetSecond().empty()) {
+			std::string& value = arrays[v.GetRawValue()];
+			if (value.empty() || value[0] != '[') {
+				tmpl = "[";
+			}
+			value = tmpl + value + v.GetSecond() + seq;
+			if (tmpl == "[") tmpl = "";
+			continue;
+		}
+		oss << v.GetRawValue() << seq;
+	}
+	// ...
+	auto itr = arrays.begin();
+	for (; itr != arrays.end(); itr++) {
+		itr->second += tmpr;
+		oss << itr->first << itr->second;
+	}
+
+	oss << "}";
+	return oss.str();
+}
+
 
 ParseJson::ParseJson() { token_flag_ = true; }
 ParseJson::~ParseJson() {}
