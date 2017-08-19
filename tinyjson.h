@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include "value.hpp"
 
 // 把json看做是对象'{}' 与 数组'[]' 的组合
@@ -36,6 +37,7 @@ typedef ValueArray<TinyJson> Values;
 class TinyJson
 {
 	friend class ValueArray<TinyJson>;
+    friend std::ostream & operator << (std::ostream& os, TinyJson& ob);
 public:
 	TinyJson();
 	~TinyJson();
@@ -63,14 +65,52 @@ public:
 	// write
 	Value& operator[](std::string k) {
 		Items_.push_back(Value(k));
-		return Items_[Items_.size() - 1];
+        Value& v = Items_[Items_.size() - 1];
+        if (k == "") {
+            nokey_ = true;
+        }
+		return v;
 	}
 
-	std::string WriteJson();
+    bool get_nokey() {
+        return nokey_;
+    }
+
+    template<int fix = 1>
+    std::string WriteJson();
 
 private:
 	std::vector<std::string> KeyVal_;
 	std::vector<Value> Items_;
+    bool nokey_;
 };
+
+template<int fix = 1>
+std::string TinyJson::WriteJson()
+{
+    std::string prefix = fix == 1 ? "{" : "[";
+    std::string suffix = fix == 1 ? "}" : "]";
+    if (fix == 0) {
+        prefix = "";
+        suffix = "";
+    }
+    std::ostringstream oss;
+    oss << prefix;
+    std::map<std::string, std::vector<std::string>> arrays;
+    int i = 0;
+    int size = Items_.size();
+    std::string seq = ",";
+    for (; i < size; ++i) {
+        Value& v = Items_[i];
+        oss << v.value() << seq;
+    }
+    std::string jsonstring = oss.str();
+    if (jsonstring.back() == ',') {
+        jsonstring = jsonstring.substr(0, jsonstring.find_last_of(','));
+    }
+
+    jsonstring += suffix;
+    return jsonstring;
+}
 
 #endif  // BUTTON_TINY_JSON_H_

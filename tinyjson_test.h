@@ -7,7 +7,7 @@ using namespace std;
 
 string jsonstring = "\
 {\
-	\"name\":\"chenhuizong\",\
+	\"name\":\"liergou\",\
 	\"age\" : 26.9,\
 	\"data\" : [\
 	{\
@@ -31,7 +31,7 @@ string jsonstring = "\
 
 string jsonstring2 = "\
 {\
-	\"name\":\"chenhuizong\",\
+	\"name\":\"liergou\",\
 	\"age\" : 26.9,\
 	\"data\" : [\
 	{\
@@ -53,8 +53,10 @@ string jsonstring2 = "\
 }\
 ";
 
+
+// read demo
 void TEST1() {
-	cout << "TEST1 ======================================================" << endl;
+	cout << "\nTEST 1 ======================================================" << endl;
 	// read
 	TinyJson json;
 	json.ReadJson(jsonstring);
@@ -83,8 +85,9 @@ void TEST1() {
 	}
 }
 
+// read demo
 void TEST2() {
-	cout << "TEST2 ======================================================" << endl;
+	cout << "\nTEST 2 ======================================================" << endl;
 	// read
 	TinyJson json;
 	json.ReadJson(jsonstring2);
@@ -111,11 +114,31 @@ void TEST2() {
 	}
 }
 
+// write demo TEST3()
+
+/*   write result
+
+{
+    "name": "liergou",
+    "age": 26,
+    "handsome": true,
+    "data": {
+        "love1": "book",
+        "love2": 666
+    },
+    "data2": {
+        "love1": "book2",
+        "love2": 6662
+    }
+}
+
+*/
+
 void TEST3() {
-	cout << "TEST3 ======================================================" << endl;
+	cout << "\nTEST 3 ======================================================" << endl;
 	// write
 	TinyJson wjson;
-	wjson["name"].Set("chenhuizong");
+	wjson["name"].Set("liergou");
 	wjson["age"].Set(26);
 	wjson["handsome"].Set(true);
 
@@ -127,10 +150,97 @@ void TEST3() {
 	subjson2["love1"].Set("book2");
 	subjson2["love2"].Set(6662);
 
-	wjson["data"].Put(subjson);
-	wjson["data"].Put(subjson2);
+	wjson["data"].Set(subjson);
+	wjson["data2"].Set(subjson2);
 
 	string str = wjson.WriteJson();
 	cout << "json string: " << endl;
 	cout << str << endl;
+}
+
+// write demo TEST4()
+
+/*   write result
+
+{
+    "name": "liergou",
+    "age" : 26,
+    "handsome" : true,
+    "data" : [
+      {
+        "love1": "book",
+        "love2" : 666
+      },
+      {
+        "love1": "book2",
+        "love2" : 6662
+      }
+    ]
+}
+
+*/
+
+void TEST4() {
+    cout << "\nTEST 4 ======================================================" << endl;
+    // write
+    TinyJson wjson;
+    wjson["name"].Set("liergou");
+    wjson["age"].Set(26);
+    wjson["handsome"].Set(true);
+
+    TinyJson subjson;
+    subjson["love1"].Set("book");
+    subjson["love2"].Set(666);
+
+    TinyJson subjson2;
+    subjson2["love1"].Set("book2");
+    subjson2["love2"].Set(6662);
+
+    TinyJson jsonarray;
+    jsonarray[""].Put(subjson);
+    jsonarray[""].Put(subjson2);
+
+    wjson["data"].SetChild(jsonarray);
+
+    string str = wjson.WriteJson();
+    cout << "json string: " << endl;
+    cout << str << endl;
+}
+
+// write demo TEST5()
+
+/*   write result
+
+{
+    "name": "liergou",
+    "age" : 26,
+    "handsome" : true,
+    "data" : [
+         "book",
+         666
+    ]
+}
+
+*/
+
+void TEST5() {
+    cout << "\nTEST 5 ======================================================" << endl;
+    // write
+    TinyJson wjson;
+    wjson["name"].Set("liergou");
+    wjson["age"].Set(26);
+    wjson["handsome"].Set(true);
+
+    TinyJson subjson;
+    subjson[""].Set("book");
+    subjson[""].Set(666);
+
+    TinyJson jsonarray;
+    jsonarray[""].Put(subjson);
+
+    wjson["data"].SetChild(jsonarray);
+
+    string str = wjson.WriteJson();
+    cout << "json string: " << endl;
+    cout << str << endl;
 }

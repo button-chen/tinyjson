@@ -1,7 +1,9 @@
 ﻿#include "tinyjson.h"
 
 
-TinyJson::TinyJson() {}
+TinyJson::TinyJson() {
+    nokey_ = false;
+}
 TinyJson::~TinyJson() {}
 
 bool TinyJson::ReadJson(std::string json) {
@@ -18,48 +20,6 @@ Values TinyJson::GetChild(std::string key) {
 	p.ParseArray(val, vo);
 	Values vals(vo);
 	return vals;
-}
-
-std::string TinyJson::WriteJson()
-{
-	std::ostringstream oss;
-	oss << "{";
-	std::map<std::string, std::vector<std::string>> arrays;
-	int i = 0;
-	int size = Items_.size();
-	std::string seq = ",";
-	for (; i < size; ++i) {
-		Value& v = Items_[i];
-		if (!v.GetSecond().empty()) {
-			std::vector<std::string>& vs = arrays[v.GetRawValue()];
-            vs.push_back(v.GetSecond());
-			continue;
-		}
-		oss << v.GetRawValue() << seq;
-	}
-	// ...
-	auto itr = arrays.begin();
-	for (; itr != arrays.end(); itr++) {
-		std::string key = itr->first;
-        std::vector<std::string> vals = itr->second;
-        std::string s;
-        for (int i = 0; i < vals.size(); i++){
-            if (i != vals.size() - 1){
-                s = vals[i] + ',';
-                continue;
-            }
-            s = vals[i];
-        }
-        s = key + "[" + s + "]";
-        oss << s << ",";
-	}
-    std::string jsonstring = oss.str();
-    if (jsonstring.back() == ','){
-        jsonstring = jsonstring.substr(0, jsonstring.find_last_of(','));
-    }
-    
-    jsonstring += "}";
-    return jsonstring;
 }
 
 ParseJson::ParseJson() {}
@@ -200,4 +160,10 @@ std::string ParseJson::FetchObjStr(std::string inputstr, int inpos, int& offset)
 
 std::vector<std::string> ParseJson::GetKeyVal() {
 	return keyval_;
+}
+
+std::ostream & operator << (std::ostream& os, TinyJson& ob)
+{
+    os << ob.WriteJson();
+    return os;
 }

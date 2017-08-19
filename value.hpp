@@ -7,11 +7,26 @@
 class Value
 {
 public:
-	Value() { value_.clear(); }
-	Value(std::string val) : value_(val) {}
+    Value() { 
+        value_.clear(); 
+        nokey_ = false;
+    }
+	Value(std::string val) : value_(val) {
+        if (value_ == "") {
+            value_.clear();
+            nokey_ = true;
+        }
+        else {
+            nokey_ = false;
+        }
+    }
 	~Value() {}
 
 public:
+    std::string value() {
+        return value_;
+    }
+
 	template<typename R>
 	R GetAs() {
 		std::istringstream iss(value_);
@@ -25,55 +40,76 @@ public:
 		return value_ == "true" ? true : false;
 	}
 
-	std::string GetRawValue() {
-		return value_;
-	}
-
-	std::string GetSecond() {
-		return second_;
-	}
-
 	template<typename V>
 	void Set(V v) {
 		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":" << v;
+        if (nokey_) {
+            oss << v;
+        }else{
+            oss << "\"" << value_ << "\"" << ":" << v;
+        }
 		value_ = oss.str();
 	}
 
 	template<>
 	void Set(std::string v) {
 		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
+        if (nokey_) {
+            oss << "\"" << v << "\"";
+        }
+        else {
+            oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
+        }
 		value_ = oss.str();
 	}
 
 	template<>
 	void Set(const char* v) {
 		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
+        if (nokey_) {
+            oss << "\"" << v << "\"";
+        }
+        else {
+            oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
+        }
 		value_ = oss.str();
 	}
 
 	template<>
 	void Set(bool v) {
 		std::ostringstream oss;
-		std::string val = v == true ? "true" : "false";
-		oss << "\"" << value_ << "\"" << ":" << val;
+        std::string val = v == true ? "true" : "false";
+        if (nokey_) {
+            oss << val;
+        }
+        else {
+            oss << "\"" << value_ << "\"" << ":" << val;
+        }
 		value_ = oss.str();
 	}
 
-	template<typename T>
-	void Put(T& tj) {
-		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":";
+    template<typename T>
+    void Put(T& v){
+        std::ostringstream oss;
+        if (v.get_nokey()) {
+            oss << v.WriteJson<0>();
+        }
+        else {
+            oss << v.WriteJson();
+        }
+        value_ = oss.str();
+    }
 
-		value_ = oss.str();
-		second_ = tj.WriteJson();
-	}
+    template<typename T>
+    void SetChild(T& v) {
+        std::ostringstream oss;
+        oss << "\"" << value_ << "\"" << ":" << v.WriteJson<2>();
+        value_ = oss.str();
+    }
 
 private:
 	std::string value_;
-	std::string second_;
+    bool nokey_;
 };
 
 template<typename T>
