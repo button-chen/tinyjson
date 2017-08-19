@@ -5,10 +5,6 @@ TinyJson::TinyJson() {}
 TinyJson::~TinyJson() {}
 
 bool TinyJson::ReadJson(std::string json) {
-	// 去掉最开始与最后的{}
-	size_t b = json.find_first_of('{');
-	size_t e = json.find_last_of('}');
-	json = json.substr(b+1, e-b);
 	ParseJson p;
 	p.ParseObj(json);
 	KeyVal_ = p.GetKeyVal();
@@ -66,91 +62,140 @@ std::string TinyJson::WriteJson()
     return jsonstring;
 }
 
-
-ParseJson::ParseJson() { token_flag_ = true; }
+ParseJson::ParseJson() {}
 ParseJson::~ParseJson() {}
 
-bool ParseJson::IsToken(char c) {
-	if (token_flag_ == false) {
-		return false;
-	}
-	if (c == '{' || c == '}' || c == '[' || c == ']'
-		|| c == ':' || c == '"' || c == ',') {
-		return true;
-	}
-	return false;
-}
-
 bool ParseJson::ParseArray(std::string json, std::vector<std::string>& vo) {
-	std::string word;
-	int cnt = 0;
-	for (int i = 0; i < json.size(); ++i) {
+	json = Trims(json, '[', ']');
+	std::string tokens;
+	int i = 0;
+	for (; i < json.size(); ++i) {
 		char c = json[i];
-		if (isspace(c)) continue;
-		if (c == '{') {
-			++cnt;
-		}
-		if (c == '}') {
-			--cnt;
-		}
-		if (c == ',' && cnt == 0) {
+		if (isspace(c) || c == '\"') continue;
+		if (c == ':' || c == ',' || c == '{') {
+			if (!tokens.empty()) {
+				vo.push_back(tokens);
+				tokens.clear();
+			}
+			if (c == ',') continue;
+			int offset = 0;
+			char nextc = c;
+			for (; c != '{';) {
+				nextc = json[++i];
+				if (isspace(nextc)) continue;
+				break;
+			}
+			if (nextc == '{') {
+				tokens = FetchObjStr(json, i, offset);
+			}
+			else if (nextc == '[') {
+				tokens = FetchArrayStr(json, i, offset);
+			}
+			i += offset;
 			continue;
 		}
-		word.push_back(c);
-		if (cnt == 0) {
-			vo.push_back(word);
-			word.clear();
-		}
+		tokens.push_back(c);
+	}
+	if (!tokens.empty()) {
+		vo.push_back(tokens);
 	}
 	return true;
 }
 
+// 解析为 key-value 调用一次解析一个层次
 bool ParseJson::ParseObj(std::string json) {
-	std::string word;
-	int  cntbig = 0;
-	int  cntmil = 0;
-	bool isbig = false;
-	bool ismil = false;
-	for (int i = 0; i < json.size(); ++i) {
+	json = Trims(json, '{', '}');
+	std::string tokens;
+	int i = 0;
+	for (; i < json.size(); ++i) {
 		char c = json[i];
-		if (isspace(c)) continue;
-
-		if (c == '[' && !isbig) {
-			token_flag_ = false;
-			ismil = true;
-			++cntmil;
-			continue;
-		}
-		if (c == '{' && !ismil) {
-			token_flag_ = false;
-			isbig = true;
-			++cntbig;
-		}
-		if (IsToken(c)) {
-			token_.push_back(c);
-			if (!word.empty()) {
-				keyval_.push_back(word);
-				word.clear();
+		if (isspace(c) || c == '\"') continue;
+		if (c == ':' || c == ',') {
+			keyval_.push_back(tokens);
+			tokens.clear();
+			if (c == ',') continue;
+			int offset = 0;
+			char nextc;
+			for (;;) {
+				nextc = json[++i];
+				if (isspace(nextc)) continue;
+				break;
 			}
+			if (nextc == '{') {
+				tokens = FetchObjStr(json, i, offset);
+			}
+			else if (nextc == '[') {
+				tokens = FetchArrayStr(json, i, offset);
+			}
+			else {
+				--i;
+			}
+			i += offset;
 			continue;
+		}
+		tokens.push_back(c);
+	}
+	if (!tokens.empty()) {
+		keyval_.push_back(tokens);
+	}
+	return true;
+}
+
+std::string ParseJson::Trims(std::string s, char lc, char rc)
+{
+	std::string ss = s;
+	if (s.find(lc) != std::string::npos && s.find(rc) != std::string::npos) {
+		size_t b = s.find_first_of(lc);
+		size_t e = s.find_last_of(rc);
+		ss = s.substr(b + 1, e - b - 1);
+	}
+	return ss;
+}
+
+std::string ParseJson::FetchArrayStr(std::string inputstr, int inpos, int& offset)
+{
+	int tokencount = 0;
+	std::string objstr;
+	int i = inpos;
+	for (; i < inputstr.size(); i++) {
+		char c = inputstr[i];
+		if (isspace(c)) continue;
+		if (c == '[') {
+			++tokencount;
 		}
 		if (c == ']') {
-			--cntmil;
+			--tokencount;
+		}
+		objstr.push_back(c);
+		if (tokencount == 0) {
+			break;
+		}
+	}
+	offset = i - inpos;
+	return objstr;
+}
+
+std::string ParseJson::FetchObjStr(std::string inputstr, int inpos, int& offset)
+{
+	int tokencount = 0;
+	std::string objstr;
+	int i = inpos;
+	for ( ; i < inputstr.size(); i++) {
+		char c = inputstr[i];
+		if (isspace(c)) continue;
+		if (c == '{') {
+			++tokencount;
 		}
 		if (c == '}') {
-			--cntbig;
+			--tokencount;
 		}
-		if (ismil && cntmil == 0 && token_flag_ == false) {
-			token_flag_ = true;
-			continue;
+		objstr.push_back(c);
+		if (tokencount == 0) {
+			break;
 		}
-		if (isbig && cntbig == 0 && token_flag_ == false) {
-			token_flag_ = true;
-		}
-		word.push_back(c);
 	}
-	token_flag_ = true;
-	return true;
+	offset = i - inpos;
+	return objstr;
 }
 
 std::vector<std::string> ParseJson::GetKeyVal() {

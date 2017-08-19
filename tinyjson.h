@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "value.hpp"
 
+// 把json看做是对象'{}' 与 数组'[]' 的组合
 class ParseJson
 {
 public:
@@ -15,23 +16,26 @@ public:
 	~ParseJson();
 
 public:
-	bool IsToken(char c);
 	bool ParseArray(std::string json, std::vector<std::string>& vo);
 	bool ParseObj(std::string json);
 	std::vector<std::string> GetKeyVal();
+	
+protected:
+	std::string Trims(std::string s, char lc, char rc);
+	std::string FetchArrayStr(std::string inputstr, int inpos, int& offset);
+	std::string FetchObjStr(std::string inputstr, int inpos, int& offset);
 
 private:
 	std::vector<char> token_;
 	std::vector<std::string> keyval_;
-	bool token_flag_;
 };
 
 class TinyJson;
-typedef ValueS<TinyJson> Values;
+typedef ValueArray<TinyJson> Values;
 
 class TinyJson
 {
-	friend class ValueS<TinyJson>;
+	friend class ValueArray<TinyJson>;
 public:
 	TinyJson();
 	~TinyJson();
@@ -48,6 +52,12 @@ public:
 		}
 		return Value(*(++itr)).GetAs<R>();
 	}
+
+	template<typename R>
+	R GetValue() {
+		return Value(KeyVal_[0]).GetAs<R>();
+	}
+
 	Values GetChild(std::string key);
 
 	// write

@@ -77,11 +77,11 @@ private:
 };
 
 template<typename T>
-class ValueS : public T
+class ValueArray : public T
 {
 public:
-	ValueS() {}
-	ValueS(std::vector<std::string> vo) {
+	ValueArray() {}
+	ValueArray(std::vector<std::string> vo) {
 		vo_ = vo;
 	}
 
