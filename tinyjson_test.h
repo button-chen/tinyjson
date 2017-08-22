@@ -1,9 +1,10 @@
 #pragma once
 
-#include "tinyjson.h"
+#include "tinyjson.hpp"
 #include <string>
 #include <iostream>
 using namespace std;
+using namespace bc;
 
 string jsonstring = "\
 {\
