@@ -107,10 +107,10 @@ public:
 	void Put(T& v) {
 		std::ostringstream oss;
 		if (v.get_nokey()) {
-			oss << v.WriteJson<0>();
+			oss << v.WriteJson_<0>();
 		}
 		else {
-			oss << v.WriteJson();
+			oss << v.WriteJson_<1>();
 		}
 		value_ = oss.str();
 	}
@@ -118,7 +118,7 @@ public:
 	template<typename T>
 	void SetChild(T& v) {
 		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":" << v.WriteJson<2>();
+		oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
 		value_ = oss.str();
 	}
 
@@ -377,8 +377,12 @@ public:
 		return nokey_;
 	}
 
-	template<int fix = 1>
-	std::string WriteJson();
+	std::string WriteJson(){
+        return WriteJson_<1>();
+    }
+
+    template<int fix>
+    std::string WriteJson_();
 
 private:
 	std::vector<std::string> KeyVal_;
@@ -393,7 +397,7 @@ std::ostream & operator << (std::ostream& os, TinyJson& ob)
 }
 
 template<int fix>
-std::string TinyJson::WriteJson()
+inline std::string TinyJson::WriteJson_()
 {
 	std::string prefix = fix == 1 ? "{" : "[";
 	std::string suffix = fix == 1 ? "}" : "]";
