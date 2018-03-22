@@ -3,8 +3,9 @@
 #include "tinyjson.hpp"
 #include <string>
 #include <iostream>
+#include <cassert>
 using namespace std;
-using namespace bc;
+using namespace tiny;
 
 string jsonstring = "\
 {\
@@ -57,7 +58,7 @@ string jsonstring2 = "\
 
 // read demo
 void TEST1() {
-	cout << "\nTEST 1 ======================================================" << endl;
+	cout << "\nTEST 1 READ JSON" << endl;
 	// read
 	TinyJson json;
 	json.ReadJson(jsonstring);
@@ -66,29 +67,46 @@ void TEST1() {
 	float age = json.Get<float>("age");
 	string lang = json.Get<string>("lang");
 
-	cout << "name: " << name << "  age: " << age << "  lang: " << lang << endl;
+	assert(name == "liergou");
+	assert(age > 26 && age < 27);
+	assert(lang == "cpp");
 
 	Values data = json.GetChild("data");
-	cout << "data: " << endl;
 	for (int i = 0; i < data.GetCount(); i++) {
 		data.Parse(i);
 		string one = data.Get<string>("one");
-		cout << "one: " << one << endl;
+		if (i == 0)
+		{
+			assert(one == "chenone");
+		}
+		if (i == 1)
+		{
+			assert(one == "chen22");
+		}
 		Values two = data.GetChild("two");
-		cout << "two:" << endl;
 		for (int ii = 0; ii < two.GetCount(); ii++) {
 			two.Parse(ii);
 			string love1 = two.Get<string>("love1");
 			int love2 = two.Get<int>("love2");
+			if (i == 0)
+			{
+				assert(love1 == "2233");
+				assert(love2 == 44444);
+			}
+			if (i == 1)
+			{
+				assert(love1 == "8899");
+				assert(love2 == 10000);
+			}
 
-			cout << "love1: " << love1 << "  love2: " << love2 << endl;
 		}
 	}
+	cout << "TEST 1 PASS" << endl;
 }
 
 // read demo
 void TEST2() {
-	cout << "\nTEST 2 ======================================================" << endl;
+	cout << "\nTEST 2 READ JSON" << endl;
 	// read
 	TinyJson json;
 	json.ReadJson(jsonstring2);
@@ -97,22 +115,45 @@ void TEST2() {
 	float age = json.Get<float>("age");
 	string lang = json.Get<string>("lang");
 
-	cout << "name: " << name << "  age: " << age << "  lang: " << lang << endl;
+	assert(name == "liergou");
+	assert(age > 26 && age < 27);
+	assert(lang == "cpp");
 
 	Values data = json.GetChild("data");
-	cout << "data: " << endl;
 	for (int i = 0; i < data.GetCount(); i++) {
 		data.Parse(i);
 		string one = data.Get<string>("one");
-		cout << "one: " << one << endl;
+		if (i == 0)
+		{
+			assert(one == "chenone");
+		}
+		if (i == 1)
+		{
+			assert(one == "chen22");
+		}
 		Values two = data.GetChild("two");
-		cout << "two:" << endl;
 		for (int ii = 0; ii < two.GetCount(); ii++) {
 			two.Parse(ii);
 			string val = two.GetValue<string>();
-			cout << val << endl;
+			if (i == 0 && ii == 0)
+			{
+				assert(val == "love_chen");
+			}
+			if (i == 0 && ii == 1)
+			{
+				assert(val == "love_hui");
+			}
+			if (i == 1 && ii == 0)
+			{
+				assert(val == "love_chen2");
+			}
+			if (i == 1 && ii == 1)
+			{
+				assert(val == "love_hui2");
+			}
 		}
 	}
+	cout << "TEST 2 PASS" << endl;
 }
 
 // write demo TEST3()
@@ -136,7 +177,7 @@ void TEST2() {
 */
 
 void TEST3() {
-	cout << "\nTEST 3 ======================================================" << endl;
+	cout << "\nTEST 3 WRITE JSON" << endl;
 	// write
 	TinyJson wjson;
 	wjson["name"].Set("liergou");
@@ -155,7 +196,7 @@ void TEST3() {
 	wjson["data2"].Set(subjson2);
 
 	string str = wjson.WriteJson();
-	cout << "json string: " << endl;
+	cout << "json string: \r\n" << endl;
 	cout << str << endl;
 }
 
@@ -182,7 +223,7 @@ void TEST3() {
 */
 
 void TEST4() {
-    cout << "\nTEST 4 ======================================================" << endl;
+    cout << "\nTEST 4 WRITE JSON" << endl;
     // write
     TinyJson wjson;
     wjson["name"].Set("liergou");
@@ -204,7 +245,7 @@ void TEST4() {
     wjson["data"].SetChild(jsonarray);
 
     string str = wjson.WriteJson();
-    cout << "json string: " << endl;
+    cout << "json string: \r\n" << endl;
     cout << str << endl;
 }
 
@@ -225,7 +266,7 @@ void TEST4() {
 */
 
 void TEST5() {
-    cout << "\nTEST 5 ======================================================" << endl;
+    cout << "\nTEST 5 WRITE JSON" << endl;
     // write
     TinyJson wjson;
     wjson["name"].Set("liergou");
@@ -242,6 +283,6 @@ void TEST5() {
     wjson["data"].SetChild(jsonarray);
 
     string str = wjson.WriteJson();
-    cout << "json string: " << endl;
+    cout << "json string: \r\n" << endl;
     cout << str << endl;
 }
