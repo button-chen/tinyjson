@@ -168,6 +168,7 @@ namespace tiny {
 
 	protected:
 		std::string Trims(std::string s, char lc, char rc);
+		int GetFirstNotSpaceChar(std::string& s, int cur);
 		std::string FetchArrayStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchObjStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchStrStr(std::string inputstr, int inpos, int& offset);
@@ -223,6 +224,7 @@ namespace tiny {
 				char tmp = json[i];
 				return tmp;
 			}
+			return '\0';
 		};
 
 		json = Trims(json, '{', '}');
@@ -270,14 +272,22 @@ namespace tiny {
 		return ss;
 	}
 
+	int ParseJson::GetFirstNotSpaceChar( std::string& s, int cur )
+	{
+		for (int i = cur; i < s.size(); i++){
+			if (isspace(s[i])) continue;
+			return i - cur;
+		}
+		return 0;
+	}
+
 	std::string ParseJson::FetchArrayStr(std::string inputstr, int inpos, int& offset)
 	{
 		int tokencount = 0;
 		std::string objstr;
-		size_t i = inpos;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
 		for (; i < inputstr.size(); i++) {
 			char c = inputstr[i];
-			if (isspace(c)) continue;
 			if (c == '[') {
 				++tokencount;
 			}
@@ -297,10 +307,9 @@ namespace tiny {
 	{
 		int tokencount = 0;
 		std::string objstr;
-		size_t i = inpos;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
 		for (; i < inputstr.size(); i++) {
 			char c = inputstr[i];
-			if (isspace(c)) continue;
 			if (c == '{') {
 				++tokencount;
 			}
@@ -320,10 +329,9 @@ namespace tiny {
 	{
 		int tokencount = 0;
 		std::string objstr;
-		size_t i = inpos;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
 		for (; i < inputstr.size(); i++) {
 			char c = inputstr[i];
-			if (isspace(c)) continue;
 			if (c == '\"') {
 				++tokencount;
 			}
@@ -340,10 +348,9 @@ namespace tiny {
 	std::string ParseJson::FetchNumStr( std::string inputstr, int inpos, int& offset )
 	{
 		std::string objstr;
-		size_t i = inpos;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
 		for (; i < inputstr.size(); i++) {
 			char c = inputstr[i];
-			if (isspace(c)) continue;
 			if (c == ',') {
 				break;
 			}

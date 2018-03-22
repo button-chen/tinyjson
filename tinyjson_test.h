@@ -9,7 +9,7 @@ using namespace tiny;
 
 string jsonstring = "\
 {\
-	\"name\":\"liergou\",\
+	\"name\":\"lier  gou\",\
 	\"age\" : 26.9,\
 	\"data\" : [\
 	{\
@@ -27,7 +27,7 @@ string jsonstring = "\
 		}\
 	}\
 	],\
-	\"lang\":\"cpp\"\
+	\"lang\":\"2cpp\"\
 }\
 ";
 
@@ -67,9 +67,9 @@ void TEST1() {
 	float age = json.Get<float>("age");
 	string lang = json.Get<string>("lang");
 
-	assert(name == "liergou");
+	assert(name == "lier  gou");
 	assert(age > 26 && age < 27);
-	assert(lang == "cpp");
+	assert(lang == "2cpp");
 
 	Values data = json.GetChild("data");
 	for (int i = 0; i < data.GetCount(); i++) {
