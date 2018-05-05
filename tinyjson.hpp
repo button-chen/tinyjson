@@ -179,7 +179,7 @@ namespace tiny {
 		std::vector<std::string> keyval_;
 	};
 
-	bool ParseJson::ParseArray(std::string json, std::vector<std::string>& vo) {
+	inline bool ParseJson::ParseArray(std::string json, std::vector<std::string>& vo) {
 		json = Trims(json, '[', ']');
 		std::string tokens;
 		size_t i = 0;
@@ -217,7 +217,7 @@ namespace tiny {
 	}
 
 	// 解析为 key-value 调用一次解析一个层次
-	bool ParseJson::ParseObj(std::string json) {
+	inline bool ParseJson::ParseObj(std::string json) {
 		auto LastValidChar = [&](int index)->char{
 			for (int i = index-1; i >= 0; --i){
 				if (isspace(json[i])) continue;
@@ -261,7 +261,7 @@ namespace tiny {
 		return true;
 	}
 
-	std::string ParseJson::Trims(std::string s, char lc, char rc)
+	inline std::string ParseJson::Trims(std::string s, char lc, char rc)
 	{
 		std::string ss = s;
 		if (s.find(lc) != std::string::npos && s.find(rc) != std::string::npos) {
@@ -272,7 +272,7 @@ namespace tiny {
 		return ss;
 	}
 
-	int ParseJson::GetFirstNotSpaceChar( std::string& s, int cur )
+	inline int ParseJson::GetFirstNotSpaceChar( std::string& s, int cur )
 	{
 		for (int i = cur; i < s.size(); i++){
 			if (isspace(s[i])) continue;
@@ -281,7 +281,7 @@ namespace tiny {
 		return 0;
 	}
 
-	std::string ParseJson::FetchArrayStr(std::string inputstr, int inpos, int& offset)
+	inline std::string ParseJson::FetchArrayStr(std::string inputstr, int inpos, int& offset)
 	{
 		int tokencount = 0;
 		std::string objstr;
@@ -303,7 +303,7 @@ namespace tiny {
 		return objstr;
 	}
 
-	std::string ParseJson::FetchObjStr(std::string inputstr, int inpos, int& offset)
+	inline std::string ParseJson::FetchObjStr(std::string inputstr, int inpos, int& offset)
 	{
 		int tokencount = 0;
 		std::string objstr;
@@ -325,7 +325,7 @@ namespace tiny {
 		return objstr;
 	}
 
-	std::string ParseJson::FetchStrStr( std::string inputstr, int inpos, int& offset )
+	inline std::string ParseJson::FetchStrStr( std::string inputstr, int inpos, int& offset )
 	{
 		int tokencount = 0;
 		std::string objstr;
@@ -345,7 +345,7 @@ namespace tiny {
 		return Trims(objstr, '\"', '\"');
 	}
 
-	std::string ParseJson::FetchNumStr( std::string inputstr, int inpos, int& offset )
+	inline std::string ParseJson::FetchNumStr( std::string inputstr, int inpos, int& offset )
 	{
 		std::string objstr;
 		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
@@ -437,7 +437,7 @@ namespace tiny {
 		bool nokey_;
 	};
 
-	std::ostream & operator << (std::ostream& os, TinyJson& ob)
+	static std::ostream & operator << (std::ostream& os, TinyJson& ob)
 	{
 		os << ob.WriteJson();
 		return os;
