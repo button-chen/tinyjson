@@ -75,8 +75,10 @@ void TEST99() {
 		data.Enter(i);
 		int one = data.Get<int>("a");
 		int two = data.Get<int>("b");
-		cout << "one: " << one << ", two: " << two << endl;
+		assert(one == 1);
+		assert(two == 2);
 	}
+	cout << "TEST 99 PASS" << endl;
 }
 
 
@@ -107,7 +109,7 @@ void TEST1() {
 		{
 			assert(one == "chen22");
 		}
-		xarray two = data.Get<xarray>("two");
+		xobject two = data.Get<xobject>("two");
 		for (int ii = 0; ii < two.Count(); ii++) {
 			two.Enter(ii);
 			string love1 = two.Get<string>("love1");

@@ -40,9 +40,7 @@ namespace tiny {
 		~Value() {}
 
 	public:
-		std::string value() {
-			return value_;
-		}
+		std::string value() { return value_; }
 		template<typename R> 
 		R GetAs() {
 			std::istringstream iss(value_);
@@ -79,14 +77,7 @@ namespace tiny {
 
 		template<>
 		void Set(const char* v) {
-			std::ostringstream oss;
-			if (nokey_) {
-				oss << "\"" << v << "\"";
-			}
-			else {
-				oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
-			}
-			value_ = oss.str();
+			Set(std::string(v));
 		}
 
 		template<>
@@ -418,6 +409,7 @@ namespace tiny {
 			Value& v = Items_[Items_.size() - 1];
 			nokey_ = true;
 			v.Push(item);
+			sub_type_ = 1;
 		}
 
 		bool get_nokey() {
@@ -430,6 +422,9 @@ namespace tiny {
 
 		template<int fix>
 		std::string WriteJson_();
+
+	public:
+		int sub_type_;
 
 	private:
 		std::vector<std::string> KeyVal_;
@@ -474,7 +469,17 @@ namespace tiny {
 	template<>
 	void Value::Set(TinyJson v) {
 		std::ostringstream oss;
-		oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
+		if (v.sub_type_ == 1) {
+			oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
+		}
+		else {
+			if (nokey_) {
+				oss << v;
+			}
+			else {
+				oss << "\"" << value_ << "\"" << ":" << v;
+			}
+		}
 		value_ = oss.str();
 	}
 
