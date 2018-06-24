@@ -42,12 +42,12 @@ void TEST1() {
 	assert(name == "zhangsan");
 	assert(age == 26);
 
-	Values data = json.GetChild("data");
+	xarray data = json.Get<xarray>("data");
 	for (int i = 0; i < data.GetCount(); i++) {
-		data.Parse(i);
+		data.Enter(i);
 		string one = data.Get<string>("one");
 		assert(one == "chenone");
-		Values two = data.GetChild("two");
+		xarray two = data.Get<xarray>("two");
 		for (int ii = 0; ii < two.GetCount(); ii++) {
 			two.Parse(ii);
 			string love1 = two.Get<string>("love1");
