@@ -3,6 +3,7 @@
 
 int main()
 {
+	TEST99();
 	TEST1();
 	TEST2();
 	TEST3();

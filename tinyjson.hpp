@@ -103,7 +103,7 @@ namespace tiny {
 		}
 
 		template<typename T>
-		void Put(T& v) {
+		void Push(T& v) {
 			std::ostringstream oss;
 			if (v.get_nokey()) {
 				oss << v.WriteJson_<0>();
@@ -111,13 +111,6 @@ namespace tiny {
 			else {
 				oss << v.WriteJson_<1>();
 			}
-			value_ = oss.str();
-		}
-
-		template<typename T>
-		void SetChild(T& v) {
-			std::ostringstream oss;
-			oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
 			value_ = oss.str();
 		}
 
@@ -137,12 +130,12 @@ namespace tiny {
 		ValueArray() {}
 		ValueArray(std::vector<std::string> vo) { vo_ = vo; }
 
-		bool Parse(int i) {
+		bool Enter(int i) {
 			std::string obj = vo_[i];
 			return ReadJson(obj);
 		}
 
-		int GetCount() { return vo_.size(); }
+		int Count() { return vo_.size(); }
 
 	private:
 		std::vector<std::string> vo_;
@@ -274,7 +267,7 @@ namespace tiny {
 
 	inline int ParseJson::GetFirstNotSpaceChar( std::string& s, int cur )
 	{
-		for (int i = cur; i < s.size(); i++){
+		for (size_t i = cur; i < s.size(); i++){
 			if (isspace(s[i])) continue;
 			return i - cur;
 		}
@@ -366,7 +359,8 @@ namespace tiny {
 	*
 	*/
 	class TinyJson;
-	typedef ValueArray<TinyJson> Values;
+	typedef ValueArray<TinyJson> xarray;
+	typedef ValueArray<TinyJson> xobject;
 
 	class TinyJson
 	{
@@ -388,7 +382,10 @@ namespace tiny {
 		}
 
 		template<typename R>
-		R Get(std::string key) {
+		R Get(std::string key = std::string()) {
+			if (key.empty()) {
+				return Value(KeyVal_[0]).GetAs<R>();
+			}
 			auto itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
 			if (itr == KeyVal_.end()) {
 				return R();
@@ -396,17 +393,13 @@ namespace tiny {
 			return Value(*(++itr)).GetAs<R>();
 		}
 
-		template<typename R>
-		R GetValue() {
-			return Value(KeyVal_[0]).GetAs<R>();
-		}
-
-		Values GetChild(std::string key) {
+		template<>
+		xarray Get(std::string key) {
 			std::string val = Get<std::string>(key);
 			ParseJson p;
 			std::vector<std::string> vo;
 			p.ParseArray(val, vo);
-			Values vals(vo);
+			xarray vals(vo);
 			return vals;
 		}
 
@@ -418,6 +411,13 @@ namespace tiny {
 				nokey_ = true;
 			}
 			return v;
+		}
+
+		void Push(TinyJson item) {
+			Items_.push_back(Value(""));
+			Value& v = Items_[Items_.size() - 1];
+			nokey_ = true;
+			v.Push(item);
 		}
 
 		bool get_nokey() {
@@ -469,6 +469,13 @@ namespace tiny {
 
 		jsonstring += suffix;
 		return jsonstring;
+	}
+
+	template<>
+	void Value::Set(TinyJson v) {
+		std::ostringstream oss;
+		oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
+		value_ = oss.str();
 	}
 
 };  // end namesapce

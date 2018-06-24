@@ -55,6 +55,30 @@ string jsonstring2 = "\
 }\
 ";
 
+string jsonstring3 = "\
+{\
+	\"xx\": {\
+		\"a\": 1,\
+		\"b\" : 2\
+	}\
+}";
+
+// read demo
+void TEST99() {
+	cout << "\nTEST 99 READ JSON" << endl;
+	// read
+	TinyJson json;
+	json.ReadJson(jsonstring3);
+
+	xobject data = json.Get<xobject>("xx");
+	for (int i = 0; i < data.Count(); i++) {
+		data.Enter(i);
+		int one = data.Get<int>("a");
+		int two = data.Get<int>("b");
+		cout << "one: " << one << ", two: " << two << endl;
+	}
+}
+
 
 // read demo
 void TEST1() {
@@ -71,9 +95,9 @@ void TEST1() {
 	assert(age > 26 && age < 27);
 	assert(lang == "2cpp");
 
-	Values data = json.GetChild("data");
-	for (int i = 0; i < data.GetCount(); i++) {
-		data.Parse(i);
+	xarray data = json.Get<xarray>("data");
+	for (int i = 0; i < data.Count(); i++) {
+		data.Enter(i);
 		string one = data.Get<string>("one");
 		if (i == 0)
 		{
@@ -83,9 +107,9 @@ void TEST1() {
 		{
 			assert(one == "chen22");
 		}
-		Values two = data.GetChild("two");
-		for (int ii = 0; ii < two.GetCount(); ii++) {
-			two.Parse(ii);
+		xarray two = data.Get<xarray>("two");
+		for (int ii = 0; ii < two.Count(); ii++) {
+			two.Enter(ii);
 			string love1 = two.Get<string>("love1");
 			int love2 = two.Get<int>("love2");
 			if (i == 0)
@@ -119,9 +143,9 @@ void TEST2() {
 	assert(age > 26 && age < 27);
 	assert(lang == "cpp");
 
-	Values data = json.GetChild("data");
-	for (int i = 0; i < data.GetCount(); i++) {
-		data.Parse(i);
+	xarray data = json.Get<xarray>("data");
+	for (int i = 0; i < data.Count(); i++) {
+		data.Enter(i);
 		string one = data.Get<string>("one");
 		if (i == 0)
 		{
@@ -131,10 +155,10 @@ void TEST2() {
 		{
 			assert(one == "chen22");
 		}
-		Values two = data.GetChild("two");
-		for (int ii = 0; ii < two.GetCount(); ii++) {
-			two.Parse(ii);
-			string val = two.GetValue<string>();
+		xarray two = data.Get<xarray>("two");
+		for (int ii = 0; ii < two.Count(); ii++) {
+			two.Enter(ii);
+			string val = two.Get<string>();
 			if (i == 0 && ii == 0)
 			{
 				assert(val == "love_chen");
@@ -239,10 +263,10 @@ void TEST4() {
     subjson2["love2"].Set(6662);
 
     TinyJson jsonarray;
-    jsonarray[""].Put(subjson);
-    jsonarray[""].Put(subjson2);
+    jsonarray.Push(subjson);
+    jsonarray.Push(subjson2);
 
-    wjson["data"].SetChild(jsonarray);
+    wjson["data"].Set(jsonarray);
 
     string str = wjson.WriteJson();
     cout << "json string: \r\n" << endl;
@@ -278,9 +302,9 @@ void TEST5() {
     subjson[""].Set(666);
 
     TinyJson jsonarray;
-    jsonarray[""].Put(subjson);
+    jsonarray.Push(subjson);
 
-    wjson["data"].SetChild(jsonarray);
+    wjson["data"].Set(jsonarray);
 
     string str = wjson.WriteJson();
     cout << "json string: \r\n" << endl;
