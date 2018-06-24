@@ -43,13 +43,13 @@ void TEST1() {
 	assert(age == 26);
 
 	xarray data = json.Get<xarray>("data");
-	for (int i = 0; i < data.GetCount(); i++) {
+	for (int i = 0; i < data.Count(); i++) {
 		data.Enter(i);
 		string one = data.Get<string>("one");
 		assert(one == "chenone");
 		xarray two = data.Get<xarray>("two");
-		for (int ii = 0; ii < two.GetCount(); ii++) {
-			two.Parse(ii);
+		for (int ii = 0; ii < two.Count(); ii++) {
+			two.Enter(ii);
 			string love1 = two.Get<string>("love1");
 			int love2 = two.Get<int>("love2");
 			assert(love1 == "2233");
