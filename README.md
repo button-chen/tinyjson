@@ -47,7 +47,7 @@ void TEST1() {
 		data.Enter(i);
 		string one = data.Get<string>("one");
 		assert(one == "chenone");
-		xarray two = data.Get<xarray>("two");
+		xobject two = data.Get<xobject>("two");
 		for (int ii = 0; ii < two.Count(); ii++) {
 			two.Enter(ii);
 			string love1 = two.Get<string>("love1");
