@@ -75,8 +75,10 @@ void TEST99() {
 		data.Enter(i);
 		int one = data.Get<int>("a");
 		int two = data.Get<int>("b");
+		int three = data.Get<int>("c", 99);
 		assert(one == 1);
 		assert(two == 2);
+		assert(three == 99);
 	}
 	cout << "TEST 99 PASS" << endl;
 }

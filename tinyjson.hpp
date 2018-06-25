@@ -373,15 +373,17 @@ namespace tiny {
 		}
 
 		template<typename R>
-		R Get(std::string key = std::string()) {
-			if (key.empty()) {
-				return Value(KeyVal_[0]).GetAs<R>();
-			}
+		R Get(std::string key, R defVal) {
 			auto itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
 			if (itr == KeyVal_.end()) {
-				return R();
+				return defVal;
 			}
 			return Value(*(++itr)).GetAs<R>();
+		}
+
+		template<typename R>
+		R Get(std::string key) {
+			return Get(key, R());
 		}
 
 		template<>
@@ -392,6 +394,11 @@ namespace tiny {
 			p.ParseArray(val, vo);
 			xarray vals(vo);
 			return vals;
+		}
+
+		template<typename R>
+		R Get() {
+			return Value(KeyVal_[0]).GetAs<R>();
 		}
 
 		// write
