@@ -3,6 +3,7 @@
 
 ## Features
 - 轻量级
+- 跨平台
 - Header only
 
 ## Example
@@ -110,6 +111,6 @@ output :
 ```
 
 ## Usage
-
+- windows vs2010 及以后版本， linux 编译需要编译选项： -std=c++0x
 - 更多例子见 tinyjson_test.h 
 
