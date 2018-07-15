@@ -1,4 +1,4 @@
-﻿
+
 #include "tinyjson_test.h"
 
 int main()

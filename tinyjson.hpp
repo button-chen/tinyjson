@@ -1,4 +1,4 @@
-﻿/**
+/**
 *
 *	tiny::TinyJson library
 *	Copyright 2017 Button
@@ -48,8 +48,7 @@ namespace tiny {
 			iss >> v;
 			return v;
 		}
-		template<> bool GetAs() { return value_ == "true" ? true : false; }
-		template<> std::string GetAs() { return value_; }
+
 
 		template<typename V> 
 		void Set(V v) {
@@ -63,44 +62,14 @@ namespace tiny {
 			value_ = oss.str();
 		}
 
-		template<> 
-		void Set(std::string v) {
-			std::ostringstream oss;
-			if (nokey_) {
-				oss << "\"" << v << "\"";
-			}
-			else {
-				oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
-			}
-			value_ = oss.str();
-		}
-
-		template<>
-		void Set(const char* v) {
-			Set(std::string(v));
-		}
-
-		template<>
-		void Set(bool v) {
-			std::ostringstream oss;
-			std::string val = v == true ? "true" : "false";
-			if (nokey_) {
-				oss << val;
-			}
-			else {
-				oss << "\"" << value_ << "\"" << ":" << val;
-			}
-			value_ = oss.str();
-		}
-
 		template<typename T>
 		void Push(T& v) {
 			std::ostringstream oss;
 			if (v.get_nokey()) {
-				oss << v.WriteJson_<0>();
+                oss << v.WriteJson(0);
 			}
 			else {
-				oss << v.WriteJson_<1>();
+                oss << v.WriteJson(1);
 			}
 			value_ = oss.str();
 		}
@@ -109,6 +78,38 @@ namespace tiny {
 		std::string value_;
 		bool nokey_;
 	};
+
+        template<> bool Value::GetAs() { return value_ == "true" ? true : false; }
+        template<> std::string Value::GetAs() { return value_; }
+        template<>
+        void Value::Set(std::string v) {
+                std::ostringstream oss;
+                if (nokey_) {
+                        oss << "\"" << v << "\"";
+                }
+                else {
+                        oss << "\"" << value_ << "\"" << ":" << "\"" << v << "\"";
+                }
+                value_ = oss.str();
+        }
+
+        template<>
+        void Value::Set(const char* v) {
+                Set(std::string(v));
+        }
+
+        template<>
+        void Value::Set(bool v) {
+                std::ostringstream oss;
+                std::string val = v == true ? "true" : "false";
+                if (nokey_) {
+                        oss << val;
+                }
+                else {
+                        oss << "\"" << value_ << "\"" << ":" << val;
+                }
+                value_ = oss.str();
+        }
 
 	/**
 	* 此模板类处理json键对应的值是一个嵌套对象或者数组的情况
@@ -123,7 +124,7 @@ namespace tiny {
 
 		bool Enter(int i) {
 			std::string obj = vo_[i];
-			return ReadJson(obj);
+                        return this->ReadJson(obj);
 		}
 
 		int Count() { return vo_.size(); }
@@ -140,8 +141,8 @@ namespace tiny {
 	class ParseJson
 	{
 	public:
-		ParseJson() {};
-		~ParseJson() {};
+        ParseJson() {}
+        ~ParseJson() {}
 
 	public:
 		bool ParseArray(std::string json, std::vector<std::string>& vo);
@@ -356,12 +357,11 @@ namespace tiny {
 	class TinyJson
 	{
 		friend class ValueArray<TinyJson>;
-		friend std::ostream & operator << (std::ostream& os, TinyJson& ob);
 	public:
 		TinyJson() {
 			nokey_ = false;
 		}
-		~TinyJson() {};
+        ~TinyJson() {}
 
 	public:
 		// read
@@ -386,20 +386,10 @@ namespace tiny {
 			return Get(key, R());
 		}
 
-		template<>
-		xarray Get(std::string key) {
-			std::string val = Get<std::string>(key);
-			ParseJson p;
-			std::vector<std::string> vo;
-			p.ParseArray(val, vo);
-			xarray vals(vo);
-			return vals;
-		}
-
-		template<typename R>
-		R Get() {
-			return Value(KeyVal_[0]).GetAs<R>();
-		}
+        template<typename R>
+        R Get() {
+            return Value(KeyVal_[0]).GetAs<R>();
+        }
 
 		// write
 		Value& operator[](std::string k) {
@@ -424,11 +414,11 @@ namespace tiny {
 		}
 
 		std::string WriteJson(){
-			return WriteJson_<1>();
+            return WriteJson(1);
 		}
 
-		template<int fix>
-		std::string WriteJson_();
+        // 0: none  1: object  2: array
+        std::string WriteJson(int type);
 
 	public:
 		int sub_type_;
@@ -439,24 +429,32 @@ namespace tiny {
 		bool nokey_;
 	};
 
-	static std::ostream & operator << (std::ostream& os, TinyJson& ob)
+    template<>
+    xarray TinyJson::Get(std::string key) {
+        std::string val = Get<std::string>(key);
+        ParseJson p;
+        std::vector<std::string> vo;
+        p.ParseArray(val, vo);
+        xarray vals(vo);
+        return vals;
+    }
+
+    std::ostream & operator << (std::ostream& os, TinyJson& ob)
 	{
 		os << ob.WriteJson();
 		return os;
 	}
 
-	template<int fix>
-	inline std::string TinyJson::WriteJson_()
+    inline std::string TinyJson::WriteJson(int type)
 	{
-		std::string prefix = fix == 1 ? "{" : "[";
-		std::string suffix = fix == 1 ? "}" : "]";
-		if (fix == 0) {
+        std::string prefix = type == 1 ? "{" : "[";
+        std::string suffix = type == 1 ? "}" : "]";
+        if (type == 0) {
 			prefix = "";
 			suffix = "";
 		}
 		std::ostringstream oss;
 		oss << prefix;
-		std::map<std::string, std::vector<std::string>> arrays;
 		int i = 0;
 		int size = Items_.size();
 		std::string seq = ",";
@@ -477,7 +475,7 @@ namespace tiny {
 	void Value::Set(TinyJson v) {
 		std::ostringstream oss;
 		if (v.sub_type_ == 1) {
-			oss << "\"" << value_ << "\"" << ":" << v.WriteJson_<2>();
+            oss << "\"" << value_ << "\"" << ":" << v.WriteJson(2);
 		}
 		else {
 			if (nokey_) {
@@ -490,6 +488,6 @@ namespace tiny {
 		value_ = oss.str();
 	}
 
-};  // end namesapce
+}  // end namesapce
 
 #endif  // TINY_JSON_H_
