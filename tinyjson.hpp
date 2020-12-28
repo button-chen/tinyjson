@@ -229,7 +229,7 @@ namespace tiny {
 			else if (nextc == '\"') {
 				tokens = FetchStrStr(json, i, offset);
 			}
-			else if (isdigit(nextc) && LastValidChar(i) == ':')
+			else if (( isdigit(nextc) || nextc == '-') && LastValidChar(i) == ':')
 			{
 				tokens = FetchNumStr(json, i, offset);
 			}
