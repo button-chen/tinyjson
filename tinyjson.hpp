@@ -158,7 +158,7 @@ namespace tiny {
 		std::string FetchObjStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchStrStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchNumStr(std::string inputstr, int inpos, int& offset);
-
+		std::string FetchBoolStr(std::string inputstr, int inpos, int& offset);
 	private:
 		std::vector<char> token_;
 		std::vector<std::string> keyval_;
@@ -233,9 +233,12 @@ namespace tiny {
 			{
 				tokens = FetchNumStr(json, i, offset);
 			}
-			else {
-				continue;
+			else if(nextc == 't' || nextc=='T' || nextc=='f' || nextc=='F')
+			{
+				tokens = FetchBoolStr(json, i, offset);
 			}
+			if (tokens.empty())
+				continue;
 			keyval_.push_back(tokens);
 			i += offset;
 		}
@@ -243,6 +246,7 @@ namespace tiny {
 		{
 			keyval_.push_back(json);
 		}
+		assert(keyval_.size() % 2 == 0);
 		return true;
 	}
 
@@ -343,6 +347,28 @@ namespace tiny {
 		}
 		offset = i - inpos;
 
+		return objstr;
+	}
+
+	inline std::string ParseJson::FetchBoolStr(std::string inputstr, int inpos, int& offset)
+	{
+		std::string objstr;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
+		for (; i < inputstr.size(); i++) {
+			char c = inputstr[i];
+			if (c == ',') {
+				break;
+			}
+			objstr.push_back(tolower(c));
+		}
+		if (objstr == "true" || objstr == "false")
+		{
+			offset = i - inpos;
+		}
+		else
+		{
+			objstr.clear();
+		}
 		return objstr;
 	}
 
