@@ -158,7 +158,7 @@ namespace tiny {
 		std::string FetchObjStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchStrStr(std::string inputstr, int inpos, int& offset);
 		std::string FetchNumStr(std::string inputstr, int inpos, int& offset);
-
+		std::string FetchBoolStr(std::string inputstr, int inpos, int& offset);
 	private:
 		std::vector<char> token_;
 		std::vector<std::string> keyval_;
@@ -201,17 +201,18 @@ namespace tiny {
 		return true;
 	}
 
+	char LastValidChar(std::string & json,int index)
+	{
+		for (int i = index-1; i >= 0; --i){
+			if (isspace(json[i])) continue;
+			char tmp = json[i];
+			return tmp;
+		}
+		return '\0';
+	}
+
 	// 解析为 key-value 调用一次解析一个层次
 	inline bool ParseJson::ParseObj(std::string json) {
-		auto LastValidChar = [&](int index)->char{
-			for (int i = index-1; i >= 0; --i){
-				if (isspace(json[i])) continue;
-				char tmp = json[i];
-				return tmp;
-			}
-			return '\0';
-		};
-
 		json = Trims(json, '{', '}');
 		size_t i = 0;
 		for (; i < json.size(); ++i) {
@@ -229,13 +230,16 @@ namespace tiny {
 			else if (nextc == '\"') {
 				tokens = FetchStrStr(json, i, offset);
 			}
-			else if (( isdigit(nextc) || nextc == '-') && LastValidChar(i) == ':')
+			else if (( isdigit(nextc) || nextc == '-') && LastValidChar(json,i) == ':')
 			{
 				tokens = FetchNumStr(json, i, offset);
 			}
-			else {
-				continue;
+			else if(nextc == 't' || nextc=='T' || nextc=='f' || nextc=='F')
+			{
+				tokens = FetchBoolStr(json, i, offset);
 			}
+			if (tokens.empty())
+				continue;
 			keyval_.push_back(tokens);
 			i += offset;
 		}
@@ -346,6 +350,28 @@ namespace tiny {
 		return objstr;
 	}
 
+	inline std::string ParseJson::FetchBoolStr(std::string inputstr, int inpos, int& offset)
+	{
+		std::string objstr;
+		size_t i = inpos + GetFirstNotSpaceChar(inputstr, inpos);
+		for (; i < inputstr.size(); i++) {
+			char c = inputstr[i];
+			if (c == ',') {
+				break;
+			}
+			objstr.push_back(tolower(c));
+		}
+		if (objstr == "true" || objstr == "false")
+		{
+			offset = i - inpos;
+		}
+		else
+		{
+			objstr.clear();
+		}
+		return objstr;
+	}
+
 	/**
 	* 对外接口类
 	*
@@ -374,7 +400,7 @@ namespace tiny {
 
 		template<typename R>
 		R Get(std::string key, R defVal) {
-			auto itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
+			std::vector<std::string>::iterator itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
 			if (itr == KeyVal_.end()) {
 				return defVal;
 			}
@@ -463,8 +489,8 @@ namespace tiny {
 			oss << v.value() << seq;
 		}
 		std::string jsonstring = oss.str();
-		if (jsonstring.back() == ',') {
-			jsonstring = jsonstring.substr(0, jsonstring.find_last_of(','));
+		if (*jsonstring.rbegin() == ',') {
+			jsonstring = jsonstring.substr(0, jsonstring.length()-1);
 		}
 
 		jsonstring += suffix;
