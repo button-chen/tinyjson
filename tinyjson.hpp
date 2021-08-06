@@ -201,17 +201,18 @@ namespace tiny {
 		return true;
 	}
 
+	char LastValidChar(std::string & json,int index)
+	{
+		for (int i = index-1; i >= 0; --i){
+			if (isspace(json[i])) continue;
+			char tmp = json[i];
+			return tmp;
+		}
+		return '\0';
+	}
+
 	// 解析为 key-value 调用一次解析一个层次
 	inline bool ParseJson::ParseObj(std::string json) {
-		auto LastValidChar = [&](int index)->char{
-			for (int i = index-1; i >= 0; --i){
-				if (isspace(json[i])) continue;
-				char tmp = json[i];
-				return tmp;
-			}
-			return '\0';
-		};
-
 		json = Trims(json, '{', '}');
 		size_t i = 0;
 		for (; i < json.size(); ++i) {
@@ -229,7 +230,7 @@ namespace tiny {
 			else if (nextc == '\"') {
 				tokens = FetchStrStr(json, i, offset);
 			}
-			else if (( isdigit(nextc) || nextc == '-') && LastValidChar(i) == ':')
+			else if (( isdigit(nextc) || nextc == '-') && LastValidChar(json,i) == ':')
 			{
 				tokens = FetchNumStr(json, i, offset);
 			}
@@ -246,7 +247,6 @@ namespace tiny {
 		{
 			keyval_.push_back(json);
 		}
-		assert(keyval_.size() % 2 == 0);
 		return true;
 	}
 
@@ -400,7 +400,7 @@ namespace tiny {
 
 		template<typename R>
 		R Get(std::string key, R defVal) {
-			auto itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
+			std::vector<std::string>::iterator itr = std::find(KeyVal_.begin(), KeyVal_.end(), key);
 			if (itr == KeyVal_.end()) {
 				return defVal;
 			}
@@ -489,8 +489,8 @@ namespace tiny {
 			oss << v.value() << seq;
 		}
 		std::string jsonstring = oss.str();
-		if (jsonstring.back() == ',') {
-			jsonstring = jsonstring.substr(0, jsonstring.find_last_of(','));
+		if (*jsonstring.rbegin() == ',') {
+			jsonstring = jsonstring.substr(0, jsonstring.length()-1);
 		}
 
 		jsonstring += suffix;
